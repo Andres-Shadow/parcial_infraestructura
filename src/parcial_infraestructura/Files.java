@@ -36,7 +36,7 @@ public class Files {
             toNetwork.write(blockToSend , 0, in);
         }
 
-        toNetwork.flush();
+        //toNetwork.flush();
         fromFile.close();
 
         pause(50);

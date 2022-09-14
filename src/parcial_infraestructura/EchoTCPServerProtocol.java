@@ -16,6 +16,7 @@ public class EchoTCPServerProtocol {
 		
 		//createStreams(socket);
 		fromNetwork = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		toNetwork = new PrintWriter(socket.getOutputStream(), true);
 
 		
 		String message = "";
@@ -37,26 +38,22 @@ public class EchoTCPServerProtocol {
 
 		}while(!renglon.equals(""));
 
+		toNetwork.write("HTTP/1.1 200 OK\r\n");
+		toNetwork.write("\r\n");
 		System.out.println("la primera linea es: "+nombre);
 		String[] list = nombre.split(" ");
 		String archivo =  list[1];
 
-		String[] strArray = null;
-//converting using String.split() method with whitespace as a delimiter
-		strArray = archivo.split("/");
-//printing the converted string array
-		for (int i = 1; i< strArray.length; i++){
-			archivo+=strArray[i];
-		}
+
+		archivo = archivo.replace("/", "\\");
+
+		String finalArchivo = "root"+archivo;
 
 
-		archivo = "\\root\\"+ archivo;
+		System.out.println("el nombre del archivo es: "+finalArchivo);
 
-		String finalArchivo = "\\root"+archivo;
 
-		System.out.println("el nombre del archivo es: "+archivo);
-
-		Files.sendFile(archivo, socket);
+		Files.sendFile(finalArchivo, socket);
 
 
 		System.out.println(message);
