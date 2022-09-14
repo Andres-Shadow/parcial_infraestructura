@@ -8,16 +8,17 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 public class EchoTCPServerProtocol {
-	
+
 	private static PrintWriter toNetwork;
 	private static BufferedReader fromNetwork;
-	
+
 	public static void protocol (Socket socket) throws Exception{
-		
+
 		//createStreams(socket);
 		fromNetwork = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		toNetwork = new PrintWriter(socket.getOutputStream(), true);
 
-		
+
 		String message = "";
 
 		ArrayList<String> renglones =  new ArrayList<>();
@@ -41,25 +42,34 @@ public class EchoTCPServerProtocol {
 		String[] list = nombre.split(" ");
 		String archivo =  list[1];
 
-		String[] strArray = null;
-//converting using String.split() method with whitespace as a delimiter
-		strArray = archivo.split("/");
-//printing the converted string array
-		for (int i = 1; i< strArray.length; i++){
-			archivo+=strArray[i];
-		}
+
+		archivo = archivo.replace("/", "\\");
+
+		String finalArchivo = "root"+archivo;
 
 
-		archivo = "\\root\\"+ archivo;
+		System.out.println("el nombre del archivo es: "+finalArchivo);
 
-		String finalArchivo = "\\root"+archivo;
 
-		System.out.println("el nombre del archivo es: "+archivo);
+		Files.sendFile(finalArchivo, socket);
 
-		Files.sendFile(archivo, socket);
+
+		/**
+
+		HTTP/1.1 200 Ok\r\n
+		Server: Carlos HTTP Server\r\n
+		Date: mié. 07 sept. 2022 20:31:55 GMT\r\n
+		Last-Modified: jue. 01 sept. 2022 12:25:40 GMT\r\n
+		Content-type: image/jpeg\r\n
+		Content-length: 11017\r\n
+		\r\n
+
+		 **/
+
 
 
 		System.out.println(message);
+
 
 	}
 }
