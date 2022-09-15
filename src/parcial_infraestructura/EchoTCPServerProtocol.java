@@ -1,75 +1,122 @@
 package parcial_infraestructura;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class EchoTCPServerProtocol {
-
-	private static PrintWriter toNetwork;
+	//private static PrintWriter toNetwork;
+	private static OutputStream toNetwork;
 	private static BufferedReader fromNetwork;
 
 	public static void protocol (Socket socket) throws Exception{
 
-		//createStreams(socket);
+		toNetwork = socket.getOutputStream();
 		fromNetwork = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		toNetwork = new PrintWriter(socket.getOutputStream(), true);
 
+		String linea="";
+		String archivo_nombre = " ";
 
-		String message = "";
-
-		ArrayList<String> renglones =  new ArrayList<>();
-
-
-		String renglon="";
-		String nombre = " ";
 		do{
-			renglon = fromNetwork.readLine();
-			if(nombre.equalsIgnoreCase(" ")){
-				nombre = renglon;
-				System.out.println("Nombre lleno");
-				System.out.println(nombre + "Este el el nombre, perro");
+			linea = fromNetwork.readLine();
+			if(archivo_nombre.equalsIgnoreCase(" ")){
+				archivo_nombre = linea;
 			}
-			System.out.println(renglon);
-			renglones.add(renglon);
+			System.out.println(linea);
+		}while(!linea.equals(""));
 
-		}while(!renglon.equals(""));
-
-		System.out.println("la primera linea es: "+nombre);
-		String[] list = nombre.split(" ");
+		String[] list = archivo_nombre.split(" ");
 		String archivo =  list[1];
-
-
 		archivo = archivo.replace("/", "\\");
+		String archivo_direccion = "root" + archivo;
 
-		String finalArchivo = "root"+archivo;
-
-
-		System.out.println("el nombre del archivo es: "+finalArchivo);
-
-
-		Files.sendFile(finalArchivo, socket);
-
+//-----------------------------------------------------------------------------------------------------//
 
 		/**
+		File localFile = new File(archivo_direccion);
+		BufferedInputStream fromFile = new BufferedInputStream(new FileInputStream(localFile));
 
-		HTTP/1.1 200 Ok\r\n
-		Server: Carlos HTTP Server\r\n
-		Date: mié. 07 sept. 2022 20:31:55 GMT\r\n
-		Last-Modified: jue. 01 sept. 2022 12:25:40 GMT\r\n
-		Content-type: image/jpeg\r\n
-		Content-length: 11017\r\n
-		\r\n
+
+		long size = localFile.length();
+
+
+		PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
+		printWriter.println(archivo_direccion);
 
 		 **/
 
+		String fecha = generar_fecha();
+		String fecha_archivo_mod = archivo_fecha_mod(archivo_direccion);
+
+		/**
+		byte[] blockToSend = new byte[512];
+		int in;
+		while ((in= fromFile.read(blockToSend)) != -1 )
+		{
+			toNetwork.write(blockToSend , 0, in);
+		}
 
 
-		System.out.println(message);
+		 String prueba = ("HTTP/1.1 200 Ok\r\n" +
+		 "Server: Titi HTTP Server\r\n" +
+		 "Date: mié. 07 sept. 2022 20:31:55 GMT\r\n"+
+		 "Last-Modified: jue. 01 sept. 2022 12:25:40 GMT\r\n" +
+		 "Contetn-type: image/jpg\r\n" +
+		 "Content-Length: 11017\r\n" +
+		 "\r\n\r\n");
 
 
+		**/
+		toNetwork.write("HTTP/1.1 200 OK\r\n".getBytes());
+		toNetwork.write("<h1>PAGINA FUNCIONANDO</h1>".getBytes());
+		toNetwork.write("Server: Titi HTTP Server\r\n".getBytes());
+		toNetwork.write(("Date: " + fecha + "\r\n").getBytes());
+		toNetwork.write(("Last-Modified: " + fecha_archivo_mod + " \r\n").getBytes());
+		toNetwork.write("Contetn-type: image/jpg\r\n".getBytes());
+		toNetwork.write("Content-Length: 11017\r\n".getBytes());
+		toNetwork.write("\r\n\r\n".getBytes());
+
+
+
+
+		/**
+		toNetwork.write("HTTP/1.1 200 OK\r\n".getBytes());
+		toNetwork.write("<h1>PAGINA FUNCIONANDO</h1>".getBytes());
+		toNetwork.write("Server: Titi HTTP Server\r\n".getBytes());
+		toNetwork.write("Date: mié. 07 sept. 2022 20:31:55 GMT\r\n".getBytes());
+		toNetwork.write("Last-Modified: jue. 01 sept. 2022 12:25:40 GMT\r\n".getBytes());
+		toNetwork.write("Contetn-type: image/jpg\r\n".getBytes());
+		toNetwork.write("Content-Length: 11017\r\n".getBytes());
+		toNetwork.write("\r\n\r\n".getBytes());
+
+		**/
+
+
+
+
+
+		toNetwork.flush();
+		toNetwork.close();
+		//fromFile.close();
+
+		//Files.sendFile(archivo_direccion, socket);
+
+	}
+
+	private static String generar_fecha() {
+		final Date tiempo_actual = new Date();
+		final SimpleDateFormat formato_fecha = new SimpleDateFormat("EEE d MMM yyyy hh:mm:ss z");
+		formato_fecha.setTimeZone(TimeZone.getTimeZone("GMT"));
+		return (formato_fecha.format(tiempo_actual));
+	}
+
+	private static String archivo_fecha_mod(String filename) {
+		File file = new File(filename);
+		final Date fecha_modificacion = new Date(file.lastModified());
+		final SimpleDateFormat formato_fecha = new SimpleDateFormat("EEE d MMM yyyy hh:mm:ss z");
+		formato_fecha.setTimeZone(TimeZone.getTimeZone("GMT"));
+		return (formato_fecha.format(fecha_modificacion));
 	}
 }
