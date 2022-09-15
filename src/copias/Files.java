@@ -1,4 +1,4 @@
-package parcial_infraestructura;
+package copias;
 
 import java.io.*;
 import java.net.Socket;
@@ -7,15 +7,15 @@ import java.util.Date;
 import java.util.TimeZone;
 
 public class Files {
-    public static void sendFile(String archivo_direccion, Socket socket) throws Exception{
+    public static void sendFile(String filename, Socket socket) throws Exception{
 
-        File localFile = new File(archivo_direccion);
+        File localFile = new File(filename);
         BufferedInputStream fromFile = new BufferedInputStream(new FileInputStream(localFile));
 
         long size = localFile.length();
 
         PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
-        printWriter.println(archivo_direccion);
+        printWriter.println(filename);
 
         OutputStream toNetwork = socket.getOutputStream();
 
@@ -25,7 +25,7 @@ public class Files {
         pause(50);
 
         String fecha = generar_fecha();
-        String fecha_archivo_mod = archivo_fecha_mod(archivo_direccion);
+        String fecha_archivo_mod = archivo_fecha_mod(filename);
 
         String respuesta = ("HTTP/1.1 200 Ok\r\n" +
                 "Server: Titi HTTP Server\r\n" +
