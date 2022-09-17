@@ -17,36 +17,11 @@ public class Files {
         PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
         printWriter.println(archivo_direccion);
 
-        OutputStream toNetwork = socket.getOutputStream();
+        printWriter.println("Tamaño archivo: "+ size);
 
-        //BufferedOutputStream toNetwork = new BufferedOutputStream(socket.getOutputStream());
-
+        BufferedOutputStream toNetwork = new BufferedOutputStream(socket.getOutputStream());
 
         pause(50);
-
-        String fecha = generar_fecha();
-        String fecha_archivo_mod = archivo_fecha_mod(archivo_direccion);
-
-        String respuesta = ("HTTP/1.1 200 Ok\r\n" +
-                "Server: Titi HTTP Server\r\n" +
-                "Date: " + fecha + "\r\n"+
-                "Last-Modified: " + fecha_archivo_mod + " \r\n" +
-                "Contetn-type: image/jpg\r\n" +
-                "Content-Length: " + size + "\r\n" +
-                "\r\n");
-
-        String prueba = ("HTTP/1.1 200 Ok\r\n" +
-                "Server: Titi HTTP Server\r\n" +
-                "Date: mié. 07 sept. 2022 20:31:55 GMT\r\n"+
-                "Last-Modified: jue. 01 sept. 2022 12:25:40 GMT\r\n" +
-                "Contetn-type: image/jpg\r\n" +
-                "Content-Length: 11017\r\n");
-
-        toNetwork.write(respuesta.getBytes());
-
-        toNetwork.write("<h1>PAGINA FUNCIONANDO</h1>".getBytes());
-
-
 
         byte[] blockToSend = new byte[512];
         int in;

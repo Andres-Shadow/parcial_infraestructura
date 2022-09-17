@@ -34,74 +34,46 @@ public class EchoTCPServerProtocol {
 
 //-----------------------------------------------------------------------------------------------------//
 
-		/**
 		File localFile = new File(archivo_direccion);
 		BufferedInputStream fromFile = new BufferedInputStream(new FileInputStream(localFile));
 
-
 		long size = localFile.length();
-
 
 		PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
 		printWriter.println(archivo_direccion);
 
-		 **/
-
 		String fecha = generar_fecha();
 		String fecha_archivo_mod = archivo_fecha_mod(archivo_direccion);
 
-		/**
-		byte[] blockToSend = new byte[512];
-		int in;
-		while ((in= fromFile.read(blockToSend)) != -1 )
-		{
-			toNetwork.write(blockToSend , 0, in);
-		}
 
+		byte[] archivo_bytes = fromFile.readAllBytes();
+		toNetwork.write(archivo_bytes);
 
-		 String prueba = ("HTTP/1.1 200 Ok\r\n" +
-		 "Server: Titi HTTP Server\r\n" +
-		 "Date: mié. 07 sept. 2022 20:31:55 GMT\r\n"+
-		 "Last-Modified: jue. 01 sept. 2022 12:25:40 GMT\r\n" +
-		 "Contetn-type: image/jpg\r\n" +
-		 "Content-Length: 11017\r\n" +
-		 "\r\n\r\n");
+//		byte[] blockToSend = new byte[512];
+//		int in;
+//		while ((in= fromFile.read(blockToSend)) != -1 )
+//		{
+//			toNetwork.write(blockToSend , 0, in);
+//		}
 
-
-		**/
-		toNetwork.write("HTTP/1.1 200 OK\r\n".getBytes());
-		toNetwork.write("<h1>PAGINA FUNCIONANDO</h1>".getBytes());
-		toNetwork.write("Server: Titi HTTP Server\r\n".getBytes());
-		toNetwork.write(("Date: " + fecha + "\r\n").getBytes());
-		toNetwork.write(("Last-Modified: " + fecha_archivo_mod + " \r\n").getBytes());
-		toNetwork.write("Contetn-type: image/jpg\r\n".getBytes());
-		toNetwork.write("Content-Length: 11017\r\n".getBytes());
+		toNetwork.write("HTTP/1.1 404 Not Found\r\n".getBytes());
+		toNetwork.write("\r\n".getBytes());
+		toNetwork.write("<h3> PRUEBA </h3>".getBytes());
 		toNetwork.write("\r\n\r\n".getBytes());
 
-
-
-
-		/**
-		toNetwork.write("HTTP/1.1 200 OK\r\n".getBytes());
-		toNetwork.write("<h1>PAGINA FUNCIONANDO</h1>".getBytes());
-		toNetwork.write("Server: Titi HTTP Server\r\n".getBytes());
-		toNetwork.write("Date: mié. 07 sept. 2022 20:31:55 GMT\r\n".getBytes());
-		toNetwork.write("Last-Modified: jue. 01 sept. 2022 12:25:40 GMT\r\n".getBytes());
-		toNetwork.write("Contetn-type: image/jpg\r\n".getBytes());
-		toNetwork.write("Content-Length: 11017\r\n".getBytes());
-		toNetwork.write("\r\n\r\n".getBytes());
-
-		**/
-
-
-
+//		toNetwork.write("HTTP/1.1 200 OK\r\n".getBytes());
+//		toNetwork.write("<h1>PAGINA FUNCIONANDO</h1>".getBytes());
+//		toNetwork.write("Server: Titi HTTP Server\r\n".getBytes());
+//		toNetwork.write(("Date: " + fecha + "\r\n").getBytes());
+//		toNetwork.write(("Last-Modified: " + fecha_archivo_mod + " \r\n").getBytes());
+//		toNetwork.write("Contetn-type: image/jpg\r\n".getBytes());
+//		toNetwork.write("Content-Length: 11017\r\n".getBytes());
+//		toNetwork.write("\r\n\r\n".getBytes());
 
 
 		toNetwork.flush();
 		toNetwork.close();
-		//fromFile.close();
-
-		//Files.sendFile(archivo_direccion, socket);
+		fromFile.close();
 
 	}
 
