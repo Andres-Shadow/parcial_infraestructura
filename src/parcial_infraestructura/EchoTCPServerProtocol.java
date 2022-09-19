@@ -15,8 +15,7 @@ public class EchoTCPServerProtocol {
 
 	public static void protocol (Socket socket) throws Exception{
 
-		toNetwork = socket.getOutputStream();
-		fromNetwork = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		createStreams(socket);
 
 		String linea="";
 		String archivo_nombre = " ";
@@ -38,32 +37,31 @@ public class EchoTCPServerProtocol {
 
 		File localFile = new File(archivo_direccion);
 
-//		PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
-//		printWriter.println(archivo_direccion);
-
 		if (localFile.exists()){
 
 			//ARCHIVO EXISTENTE
 
-			System.out.println("START - ARCHIVO EXISTENTE ENVIADO :)");
+			File foundFile = new File(archivo_direccion);
 
 			String servidor = "Titi HTTP Server";
 			String fecha = generar_fecha();
 			String fecha_archivo_mod = archivo_fecha_mod(archivo_direccion);
-			String contentType = Files.probeContentType(localFile.toPath());
-			long size = localFile.length();
+			String contentType = Files.probeContentType(foundFile.toPath());
+			long size = foundFile.length();
 
 			String encabezados = "HTTP/1.1 200 Ok\r\n" +
 					"Server: " + servidor + "\r\n" +
 					"Date: " + fecha + "\r\n"+
 					"Last-Modified: " + fecha_archivo_mod +"\r\n" +
 					"Contetn-type: "+ contentType +"\r\n" +
-					"Content-Length: "+ size +"\r\n"
-					+"\r\n\r\n";
+					"Content-length: "+ size +"\r\n"
+					+"\r\n";
 
-			sendFile(localFile, encabezados);
+			sendFile(foundFile, encabezados);
+
 			System.out.println("END - ARCHIVO EXISTENTE ENVIADO :)");
 
+			System.out.println("END - ARCHIVO EXISTENTE ENVIADO :)");
 
 		}else{
 
@@ -74,8 +72,6 @@ public class EchoTCPServerProtocol {
 			String servidor = "Titi HTTP Server";
 			String fecha = generar_fecha();
 			String contentType = Files.probeContentType(notFile.toPath());
-
-
 			long size = notFile.length();
 
 			String encabezados = "HTTP/1.1 404 Not Found\r\n" +
@@ -92,6 +88,11 @@ public class EchoTCPServerProtocol {
 		}
 
 
+	}
+
+	private static void createStreams(Socket socket) throws IOException {
+		toNetwork = socket.getOutputStream();
+		fromNetwork = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 	}
 
 	public static void sendFile(File file, String mensaje){
