@@ -5,9 +5,11 @@ import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import java.nio.file.Files;
+
 
 public class EchoTCPServerProtocol {
-	//private static PrintWriter toNetwork;
+
 	private static OutputStream toNetwork;
 	private static BufferedReader fromNetwork;
 
@@ -35,46 +37,84 @@ public class EchoTCPServerProtocol {
 //-----------------------------------------------------------------------------------------------------//
 
 		File localFile = new File(archivo_direccion);
-		BufferedInputStream fromFile = new BufferedInputStream(new FileInputStream(localFile));
 
-		long size = localFile.length();
+//		PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
+//		printWriter.println(archivo_direccion);
 
-		PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
-		printWriter.println(archivo_direccion);
+		if (localFile.exists()){
 
-		String fecha = generar_fecha();
-		String fecha_archivo_mod = archivo_fecha_mod(archivo_direccion);
+			//ARCHIVO EXISTENTE
 
+			System.out.println("START - ARCHIVO EXISTENTE ENVIADO :)");
 
-		byte[] archivo_bytes = fromFile.readAllBytes();
-		toNetwork.write(archivo_bytes);
+			String servidor = "Titi HTTP Server";
+			String fecha = generar_fecha();
+			String fecha_archivo_mod = archivo_fecha_mod(archivo_direccion);
+			String contentType = Files.probeContentType(localFile.toPath());
+			long size = localFile.length();
 
-//		byte[] blockToSend = new byte[512];
-//		int in;
-//		while ((in= fromFile.read(blockToSend)) != -1 )
-//		{
-//			toNetwork.write(blockToSend , 0, in);
-//		}
+			String encabezados = "HTTP/1.1 200 Ok\r\n" +
+					"Server: " + servidor + "\r\n" +
+					"Date: " + fecha + "\r\n"+
+					"Last-Modified: " + fecha_archivo_mod +"\r\n" +
+					"Contetn-type: "+ contentType +"\r\n" +
+					"Content-Length: "+ size +"\r\n"
+					+"\r\n\r\n";
 
-		toNetwork.write("HTTP/1.1 404 Not Found\r\n".getBytes());
-		toNetwork.write("\r\n".getBytes());
-		toNetwork.write("<h3> PRUEBA </h3>".getBytes());
-		toNetwork.write("\r\n\r\n".getBytes());
-
-//		toNetwork.write("HTTP/1.1 200 OK\r\n".getBytes());
-//		toNetwork.write("<h1>PAGINA FUNCIONANDO</h1>".getBytes());
-//		toNetwork.write("Server: Titi HTTP Server\r\n".getBytes());
-//		toNetwork.write(("Date: " + fecha + "\r\n").getBytes());
-//		toNetwork.write(("Last-Modified: " + fecha_archivo_mod + " \r\n").getBytes());
-//		toNetwork.write("Contetn-type: image/jpg\r\n".getBytes());
-//		toNetwork.write("Content-Length: 11017\r\n".getBytes());
-//		toNetwork.write("\r\n\r\n".getBytes());
+			sendFile(localFile, encabezados);
+			System.out.println("END - ARCHIVO EXISTENTE ENVIADO :)");
 
 
-		toNetwork.flush();
-		toNetwork.close();
-		fromFile.close();
+		}else{
 
+			System.out.println("START - NOT FOUND :(");
+
+			File notFile = new File("root/notfound.html");
+
+			String servidor = "Titi HTTP Server";
+			String fecha = generar_fecha();
+			String contentType = Files.probeContentType(notFile.toPath());
+
+
+			long size = notFile.length();
+
+			String encabezados = "HTTP/1.1 404 Not Found\r\n" +
+					"Server: " + servidor + "\r\n" +
+					"Date: " + fecha + "\r\n" +
+					"Content-type: "+ contentType + "\r\n" +
+					"Content-Length: "+ size +"\r\n"
+					+"\r\n\r\n";
+
+			sendFile(notFile, encabezados);
+
+			System.out.println("END - NOT FOUND ENVIADO :)");
+
+		}
+
+
+	}
+
+	public static void sendFile(File file, String mensaje){
+		try {
+
+			toNetwork.write(mensaje.getBytes());
+
+			BufferedInputStream buffer_file = new BufferedInputStream(new FileInputStream(file));
+
+			byte[] blockToSend = new byte[512];
+			int in;
+			while ((in= buffer_file.read(blockToSend)) != -1 )
+			{
+				toNetwork.write(blockToSend , 0, in);
+			}
+
+			toNetwork.write("\r\n\r\n".getBytes());
+			toNetwork.flush();
+			toNetwork.close();
+
+		}catch (Exception e){
+			System.out.println();
+		}
 	}
 
 	private static String generar_fecha() {
